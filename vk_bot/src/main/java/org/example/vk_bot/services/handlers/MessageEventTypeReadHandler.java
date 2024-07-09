@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @EventTypeHandler(EventTypeMessageRead.class)
-public class MessageEventTypeReadHandler extends Handler {
+public final class MessageEventTypeReadHandler extends Handler {
     @Override
     public HttpStatus getResponse(VKRequest request) {
         return HttpStatus.OK;
