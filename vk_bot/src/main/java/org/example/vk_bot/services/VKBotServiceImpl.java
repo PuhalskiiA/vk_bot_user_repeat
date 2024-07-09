@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class VKBotServiceImpl implements VKBotService {
+public final class VKBotServiceImpl implements VKBotService {
     final EventTypeHandlerRepository handlerRepository;
 
     @Override

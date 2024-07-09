@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class EventTypeHandlerRepository {
+public final class EventTypeHandlerRepository {
     Map<Class<? extends EventType>, Handler> handlers = new HashMap<>();
 
     public EventTypeHandlerRepository(List<Handler> handlers) {

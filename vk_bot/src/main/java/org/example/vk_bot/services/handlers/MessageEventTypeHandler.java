@@ -1,7 +1,5 @@
 package org.example.vk_bot.services.handlers;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import org.example.vk_bot.models.VKRequest;
 import org.example.vk_bot.models.event_types.EventTypeMessage;
 import org.example.vk_bot.utils.EventTypeHandler;
@@ -16,7 +14,7 @@ import java.net.URL;
 
 @Service
 @EventTypeHandler(EventTypeMessage.class)
-public class MessageEventTypeHandler extends Handler {
+public final class MessageEventTypeHandler extends Handler {
     @Override
     public HttpStatus getResponse(VKRequest request) {
         try {
