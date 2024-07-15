@@ -10,25 +10,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public final class WebhookController {
     VKBotService VKBotService;
 
     @PostMapping(value = "/webhook")
     public ResponseEntity<String> receiveWebhook(@RequestBody VKRequest request) {
-        try {
-            if (VKBotService.getResponse(request).is2xxSuccessful()) {
-                return new ResponseEntity<>("ok", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-        } catch (Exception e) {
-            System.out.println(VKBotService.getResponse(request).is2xxSuccessful());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.toString());
+        if (VKBotService.getResponse(request).is2xxSuccessful()) {
+            return new ResponseEntity<>("ok", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 }

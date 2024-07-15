@@ -1,57 +1,60 @@
 package org.example.vk_bot.services.handlers;
 
+import lombok.RequiredArgsConstructor;
 import org.example.vk_bot.models.VKRequest;
-import org.example.vk_bot.models.event_types.EventTypeMessage;
+import org.example.vk_bot.models.objects_types.VKSideRequestMessageObject;
+import org.example.vk_bot.models.objects_types.VKSideRequestObjectMessageEvent;
 import org.example.vk_bot.utils.EventTypeHandler;
 import org.example.vk_bot.utils.Token;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-@EventTypeHandler(EventTypeMessage.class)
+@RequiredArgsConstructor
+@EventTypeHandler(VKSideRequestObjectMessageEvent.class)
 public final class MessageEventTypeHandler extends Handler {
+    private final RestTemplate restTemplate;
+
     @Override
-    public HttpStatus getResponse(VKRequest request) {
-        try {
-            HttpURLConnection connection = composeHttpURLConnection(request);
-            connection.getResponseCode();
+    public HttpStatusCode getResponse(VKRequest request) {
+        HttpEntity<String> entity = new HttpEntity<>(composeHeaders());
 
-            return HttpStatus.OK;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return HttpStatus.BAD_REQUEST;
-        }
+        ResponseEntity<String> response = restTemplate
+                .exchange(composeURI(request), HttpMethod.GET, entity, String.class);
+
+        return response.getStatusCode();
     }
 
-    private static HttpURLConnection composeHttpURLConnection(VKRequest request) throws IOException {
-        URL url = composeURL(request);
+    private static HttpHeaders composeHeaders() {
+        HttpHeaders headers = new HttpHeaders();
 
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        headers.set("Authorization", "Bearer " + Token.getToken());
 
-        connection.setRequestMethod("GET");
-        connection.setDoOutput(true);
-        connection.setRequestProperty("Authorization", "Bearer " + Token.getToken());
-
-        return connection;
+        return headers;
     }
 
-    private static URL composeURL(VKRequest request) throws MalformedURLException {
-        String urlString = "https://api.vk.com/method/messages.send?" +
-                "user_id=" + request.getObject().getEvent().getFromId() +
-                "&random_id=" + (int) (Math.random() * 2000000) +
-                "&message=" + composeMessageFromInput(request) +
-                "&v=" + request.getV();
+    private static URI composeURI(VKRequest request) {
+        VKSideRequestMessageObject object = (VKSideRequestMessageObject) request.getObject();
 
-        return new URL(urlString);
+        UriComponents builder = UriComponentsBuilder.newInstance()
+                .scheme("https").host("api.vk.com").path("/method/messages.send")
+                .queryParam("user_id", object.getFromId())
+                .queryParam("random_id", ThreadLocalRandom.current().nextInt())
+                .queryParam("message", composeMessageFromInputObject(object))
+                .queryParam("v", request.getV())
+                .build();
+
+        return builder.toUri();
     }
 
-    private static String composeMessageFromInput(VKRequest request) {
-        String message = request.getObject().getEvent().getMessageText().replace(" ", "+");
+    private static String composeMessageFromInputObject(VKSideRequestMessageObject object) {
+        String message = object.getMessageText().replace(" ", "+");
 
         StringBuilder builder = new StringBuilder(message);
         builder.insert(0, "You+said+");

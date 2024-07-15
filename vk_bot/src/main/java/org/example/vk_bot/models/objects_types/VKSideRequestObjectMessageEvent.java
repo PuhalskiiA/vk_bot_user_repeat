@@ -6,19 +6,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.example.vk_bot.models.event_types.EventType;
-import org.example.vk_bot.models.event_types.EventTypeMessage;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class VKSideRequestObjectMessageEvent extends VKSideRequestObject {
+public class VKSideRequestObjectMessageEvent implements VKSideRequestMessageObject {
     @JsonProperty("message")
     EventTypeMessage eventTypeMessage;
 
     @Override
-    public EventType getEvent() {
-        return eventTypeMessage;
+    public String getMessageText() {
+        return eventTypeMessage.getText();
+    }
+
+    @Override
+    public Integer getFromId() {
+        return eventTypeMessage.getFromId();
     }
 }
